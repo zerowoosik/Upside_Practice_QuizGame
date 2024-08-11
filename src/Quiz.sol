@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
+import "forge-std/console.sol";
 
 contract Quiz{
     struct Quiz_item {
@@ -48,7 +49,8 @@ contract Quiz{
     }
     
     function betToPlay(uint quizId) public payable {
-        require(msg.value <= quizzes[quizId - 1].max_bet && msg.value >= quizzes[quizId - 1].min_bet);
+        require((msg.value <= quizzes[quizId - 1].max_bet && msg.value >= quizzes[quizId - 1].min_bet)
+        && (address(this).balance + msg.value >= msg.value * 2));
 
         bets[quizId - 1 ][msg.sender] += msg.value;
     }
@@ -68,6 +70,7 @@ contract Quiz{
     function claim() public {
         if(isSolved[msg.sender] > 0) {
             address(msg.sender).call{value : bets[isSolved[msg.sender] - 1 ][msg.sender] * 2}("");
+            isSolved[msg.sender] = 0;
         }
     }
 
